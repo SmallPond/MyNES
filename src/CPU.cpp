@@ -1,6 +1,7 @@
 #include <CPU.h>
 #include <CPUOpcodes.h>
 #include <MainBus.h>
+/* CPU 6502 */
 
 CPU::CPU(MainBus &mem) : m_bus(mem) 
 {
