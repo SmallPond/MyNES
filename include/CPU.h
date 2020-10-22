@@ -1,26 +1,24 @@
 #ifndef _CPU_H_
 #define _CPU_H_
-#include<MainBus.h>
-
-/* 6502 CPU 16-bit address 8-bit data */
-using Byte = std::uint8_t;
-using Address = std::uint16_t;
-
+#include <MainBus.h>
 
 class CPU {
     public:
-        CPU();
+        /* CPU 连接总线 */
+        CPU(MainBus &mem);
 
         void Reset();
-        void ResetAddress(Address start_address);
+        void Reset(Address start_address);
+
         void Step();
+        Address GetPC() { return r_PC; }
+
     private:
         Address ReadAddress(Address addr);
 
         /* CPU exec instruction*/
         void PushStack(Byte value);
-        Byte PopStack();
-
+        Byte PullStack();
 
         int m_skipCycles;
         int m_cycles;
@@ -37,10 +35,12 @@ class CPU {
         bool f_C;         /* Carry */
         bool f_Z;         /* Zero */
         bool f_I;         /* IRQ disable */
-//      bool f_B;         /* Brk command */
+        bool f_B;         /* Brk command */
         bool f_D;         /* Decimal mode */
         bool f_V;         /* Overflow  */
         bool f_N;         /* Negative */
-}
+
+        MainBus &m_bus;
+};
 
 #endif 
