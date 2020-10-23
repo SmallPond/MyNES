@@ -16,14 +16,23 @@ class CPU {
     private:
         Address ReadAddress(Address addr);
 
+        /* 模拟指令执行 */
+        bool ExecuteImplied(Byte opcode);
+        bool ExecuteBranch(Byte opcode);
+        bool ExecuteType0(Byte opcode);
+        bool ExecuteType1(Byte opcode);
+        bool ExecuteType2(Byte opcode);
+
+        void SetPageCrossed(Address a, Address b, int inc = 1);
         /* CPU exec instruction*/
         void PushStack(Byte value);
         Byte PullStack();
+        void SetZN(Byte value);
 
         int m_skipCycles;
         int m_cycles;
 
-        //Registers
+        //Registers 参考 doc/rockwell_r650x.pdf文件
         Address r_PC;    // PC
         Byte r_SP;       /* Stack Pointer */ 
         Byte r_A;        /* Accumulator */
@@ -35,7 +44,7 @@ class CPU {
         bool f_C;         /* Carry */
         bool f_Z;         /* Zero */
         bool f_I;         /* IRQ disable */
-        bool f_B;         /* Brk command */
+        // bool f_B;         /* Brk command */
         bool f_D;         /* Decimal mode */
         bool f_V;         /* Overflow  */
         bool f_N;         /* Negative */
