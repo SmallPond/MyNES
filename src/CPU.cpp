@@ -4,6 +4,24 @@
 #include <Log.h>
 /* CPU 6502 */
 
+/*
+参考：中文版 http://nesdev.com/nes_c.txt
+     英文版： http://fms.komkon.org/EMUL8/NES.html
+CPU Memory Map
+--------------------------------------- $10000
+ Upper Bank of Cartridge ROM            卡带的上层ROM
+--------------------------------------- $C000
+ Lower Bank of Cartridge ROM            卡带的下层ROM
+--------------------------------------- $8000
+ Cartridge RAM (may be battery-backed)  卡带的RAM（可能有电池支持）
+--------------------------------------- $6000
+ Expansion Modules                      扩充的模块
+--------------------------------------- $5000
+ Input/Output                           输入/输出
+--------------------------------------- $2000
+ 2kB Internal RAM, mirrored 4 times     2KB的内部RAM，做4次镜象
+--------------------------------------- $0000
+*/
 CPU::CPU(MainBus &mem) : m_bus(mem) 
 {
     
@@ -31,6 +49,7 @@ Byte CPU::PullStack()
 {
     return m_bus.Read(0x100 | ++r_SP);
 }
+
 
 void CPU::SetZN(Byte value)
 {
@@ -65,6 +84,11 @@ void CPU::Step()
     */ 
     Byte opcode = m_bus.Read(r_PC++);
     auto CycleLength = OperationCycles[opcode];
+    // LOG(Info) << "CPU Step, opcode is:" 
+    //         <<  static_cast<int>(opcode)  
+    //         << "\t CycleLength is " << CycleLength
+    //          << std::endl;
+    
 
     if(CycleLength && ( ExecuteImplied(opcode) || ExecuteBranch(opcode) ||
                         ExecuteType1(opcode) || ExecuteType2(opcode)) )
@@ -279,6 +303,7 @@ bool CPU::ExecuteBranch(Byte opcode)
 
 bool CPU::ExecuteType1(Byte opcode)
 {
+
     if ((opcode & InstructionModeMask) == 0x1)
     {
         Address location = 0; //Location of the operand, could be in RAM
@@ -365,6 +390,7 @@ bool CPU::ExecuteType1(Byte opcode)
                 m_bus.Write(location, r_A);
                 break;
             case LDA:
+                /* m_bus.Read()返回4，但是r_A输出是空的，是因为没加强制转换*/
                 r_A = m_bus.Read(location);
                 SetZN(r_A);
                 break;

@@ -9,12 +9,12 @@ const auto OperationShift = 5;
 
 /* 
  * 操作码的哪几位指定了寻址方式？ 
- * datasheet中16x16的表格每一列的寻址方式是相同的
+ * datasheet中16x16的表格每一列的寻址方式是基本相同的
 */
 const auto AddrModeMask = 0x1c;
 const auto AddrModeShift = 2;
 
-const auto BranchInstructionMask = 0x1f;
+const auto BranchInstructionMask = 0x1f;    /*0001_1111*/
 const auto BranchInstructionMaskResult = 0x10;
 const auto BranchConditionMask = 0x20;
 const auto BranchOnFlagShift = 6;
@@ -95,7 +95,7 @@ enum AddressingMode1
     IndirectY, /* 寄存器间接寻址 */
     IndexedX,  /* 寄存器间接寻址 */
     AbsoluteY,
-    AbsoluteX,
+    AbsoluteX, /* */ 
 };
 
 enum Operation2
