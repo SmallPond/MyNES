@@ -9,6 +9,10 @@
 
 参考6502 CPU 的datasheet，实现了CPU对指令的解码执行
 ## Day3
+[注] main分支删除了为了测试CPU工作而添加的一些不必要接口，例如`MainBus(Cartridge& cartridge)`、`Byte GetACC() { return r_A;}`，如果需要测试，需要切换到Day3分支
+```c
+git checkout day3
+```
 
 NES 软件编写示例，位于`example/nes`目录下，主要包括文件
 - `nes.cfg`：指定了链接方式
