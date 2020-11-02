@@ -1,10 +1,27 @@
 #include <MainBus.h>
 #include <iostream>
+#include <Log.h>
 /*  0x800 = 2KB */
 MainBus::MainBus() : m_RAM(0x800, 0)
 {
 }
 
+
+bool MainBus::SetMapper(Mapper *mapper)
+{
+    m_mapper = mapper;
+
+    if (!mapper)
+    {
+        LOG(Error) << "Mapper pointer is nullptr" << std::endl;
+        return false;
+    }
+
+    if(mapper->HasExtendedRAM())
+        m_extRAM.resize(0x2000);
+    
+    return true;
+}
 
 Byte MainBus::Read(Address addr)
 {

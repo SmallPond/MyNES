@@ -15,8 +15,36 @@ const std::vector<Byte>& Cartridge::GetVROM()
     return m_CHR_ROM;
 }
 
+Byte Cartridge::GetMapper()
+{
+    return m_mapperNumber;
+}
+
+Byte Cartridge::GetNameTableMirroring()
+{
+    return m_nameTableMirroring;
+}
+
+bool Cartridge::HasExtendedRAM()
+{
+    return m_extendedRAM;
+}
+
+/*
+ * .NES 文件头格式 https://wiki.nesdev.com/w/index.php/INES
+ * 0-3: Constant $4E $45 $53 $1A ("NES" followed by MS-DOS end-of-file)
+ * 4: Size of PRG ROM in 16 KB units
+ * 5: Size of CHR ROM in 8 KB units (Value 0 means the board uses CHR RAM)
+ * 6: Flags 6 - Mapper, mirroring, battery, trainer
+ * 7: Flags 7 - Mapper, VS/Playchoice, NES 2.0
+ * 8: Flags 8 - PRG-RAM size (rarely used extension)
+ * 9: Flags 9 - TV system (rarely used extension)
+ * 10: Flags 10 - TV system, PRG-RAM presence (unofficial, rarely used extension)
+ * 11-15: Unused padding (should be filled with zero, but some rippers put their name across bytes 7-15
+*/
 bool Cartridge::LoadFromFile(std::string path)
 {
+
     std::ifstream romFile (path, std::ios_base::binary | std::ios_base::in);
     if (!romFile) 
     {
@@ -45,7 +73,7 @@ bool Cartridge::LoadFromFile(std::string path)
         return false;
     }
 
-    LOG(Info) << "Reading header, it dictates: \n";
+    LOG(Info) << "Reading header, it dictates: \n-*--*--*--*--*--*--*--*-\n";
 
     Byte banks = header[4];
     LOG(Info) << "16KB PRG-ROM Banks: " << +banks << std::endl;
@@ -57,6 +85,16 @@ bool Cartridge::LoadFromFile(std::string path)
     // vidio banks
     Byte vbanks = header[5];
     LOG(Info) << "8KB CHR-ROM Banks: " << +vbanks << std::endl;
+    // nameTableMirroring
+    m_nameTableMirroring = header[6] & 0xB;
+    LOG(Info) << "Name Table Mirroring: " << +m_nameTableMirroring << std::endl;
+    // mapper Number 
+    m_mapperNumber = ((header[6] >> 4) & 0xf) | (header[7] & 0xf0);
+    LOG(Info) << "Mapper number #: " << +m_mapperNumber << std::endl;
+
+    m_extendedRAM = header[6] & 0x2;
+    LOG(Info) << "Extended (CPU) RAM: " << std::boolalpha << m_extendedRAM << std::endl;
+
     // 模拟器暂不支持 使用 Trainer 格式的 .NES 文件
     if (header[6] & 0x4)
     {
@@ -80,11 +118,7 @@ bool Cartridge::LoadFromFile(std::string path)
         LOG(Error) << "Reading PRG-ROM from image file failed." << std::endl;
         return false;
     }
-    for(int i = 0; i < 20; i++) 
-    {
-        std::cout << std::hex <<  static_cast<int>(m_PRG_ROM[i]) << " ";
-    }
-    std::cout << "\n";
+
     //CHR-ROM 8KB banks
     if (vbanks)
     {
@@ -98,5 +132,6 @@ bool Cartridge::LoadFromFile(std::string path)
     }
     else
         LOG(Info) << "Cartridge with CHR-RAM." << std::endl;
+    LOG(Info) << "-*--*--*--*--*--*--*--*-\n" << std::endl;
     return true;
 }

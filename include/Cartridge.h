@@ -24,11 +24,17 @@ class Cartridge
         bool LoadFromFile(std::string path);
         const std::vector<Byte>& GetROM();
         const std::vector<Byte>& GetVROM();
-
+        bool HasExtendedRAM();
+        Byte GetMapper();
+        Byte GetNameTableMirroring();
 
     private:
         std::vector<Byte> m_PRG_ROM;   // 存放 NES 程序数据
-        std::vector<Byte> m_CHR_ROM;   // 存放了 NES 图像数据
+        std::vector<Byte> m_CHR_ROM;   // 角色只读存储器，用于图像显示
+
+        Byte m_nameTableMirroring;   
+        Byte m_mapperNumber;            // mappper号 最基础为0
+        bool m_extendedRAM;             // 卡带中是否存在扩展RAM
 };
 
 
