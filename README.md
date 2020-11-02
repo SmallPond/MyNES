@@ -2,6 +2,13 @@
 
 选择不同的分支来查看每次增加的内容，以达到分解整个项目实现的目的。
 
+```
+# 编译
+make
+# 执行
+./myNES ./resources/Super_mario_brothers.nes
+```
+
 ## Day1:
 
 6502 拥有 16 位地址空间，寻址能力为 64 KB。但是 NES 实际只有 2 KB的内部 RAM，对应的地址范围是 0000～0799。而剩余的地址空间则用于访问 PPU、 APU、游戏卡以及输入设备等。  
@@ -123,7 +130,7 @@ Flags6的高四位记录了mapper number的低四位，Flags7的高四位记录�
 
 ## Emulator
 
-增加 Emulator ,综合各个组件
+增加 Emulator 以综合各个组件
 
 ## 编译运行
 
