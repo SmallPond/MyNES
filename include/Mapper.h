@@ -34,7 +34,7 @@ class Mapper
 
         virtual Byte ReadCHR (Address addr) = 0;
         virtual void WriteCHR (Address addr, Byte value) = 0;
-        virtual NameTableMirroring getNameTableMirroring();
+        virtual NameTableMirroring GetNameTableMirroring();
         
         bool inline HasExtendedRAM()
         {

@@ -132,10 +132,28 @@ Flags6的高四位记录了mapper number的低四位，Flags7的高四位记录�
 
 增加 Emulator 以综合各个组件
 
-## 编译运行
+# Day5
 
-```
-make clean
+## SFML多媒体库配置和使用
+根据自己所使用的操作系统，在[SFML官方文档](https://www.sfml-dev.org/tutorials/2.5/)找到对应的配置方式。
 
-./myNES ./resources/Supper_mario_brothers.nes
+建议最好使用官方已经编译好的 SDK，替换到系统的默认动态链接库目录或任意目录下（此时编译链接时需要制定对应的头文件和库文件目录）
+
+例如，在 Macos 下通过`brew install sfml`安装 SFML SDK后，将在`/usr/local/Cellar/sfml/2.5.1`目录下保存头文件和库文件。在 Makefile 文件下需要指定`CFLAGS`和`LDFLAGS`。
+
+```c
+SFML_INC = /usr/local/Cellar/sfml/2.5.1/include
+
+CFLAGS = -g -Wall -I${INC} -I${SFML_INC} -std=c++11
+# 不仅要指定目录，还要指定对应链接的库，不然就是 undefined reference 
+LDFLAGS = -L/usr/local/Cellar/sfml/2.5.1/lib -lsfml-graphics -lsfml-window -lsfml-system
 ```
+
+编译运行结果如图：
+
+![SFML库环境测试](./images/SFML_Test.png)
+
+
+## PPU总线（Picture Bus）以及虚拟屏幕(Virtual Screen)的实现
+
+在使用 SFML 库创建一个 windows后，内容的填充使用 VirtualScreen 类来实现。PictureBus 类似于我们之前实现的 MainBus，不过 PictureBus 是用来连接PPU（Picture Processing Unit,类比于现在的显卡）和 vdeio 相关的存储的。 

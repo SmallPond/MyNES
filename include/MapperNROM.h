@@ -12,7 +12,6 @@ class MapperNROM : public Mapper
         
         Byte ReadCHR(Address addr);
         void WriteCHR(Address addr, Byte value);
-
     private:
         bool m_oneBank;
         bool m_usesCharacterRAM;
