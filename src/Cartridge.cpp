@@ -2,7 +2,10 @@
 #include<fstream>
 #include <Log.h>
 
-Cartridge::Cartridge()
+Cartridge::Cartridge():
+    m_nameTableMirroring(0),
+    m_mapperNumber(0),
+    m_extendedRAM(false)
 {
 
 }
@@ -132,6 +135,7 @@ bool Cartridge::LoadFromFile(std::string path)
     }
     else
         LOG(Info) << "Cartridge with CHR-RAM." << std::endl;
+    
     LOG(Info) << "-*--*--*--*--*--*--*--*-\n" << std::endl;
     return true;
 }

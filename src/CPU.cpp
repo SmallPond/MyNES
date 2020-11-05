@@ -50,9 +50,49 @@ Byte CPU::PullStack()
     return m_bus.Read(0x100 | ++r_SP);
 }
 
+void CPU::Interrupt(InterruptType type)
+{
+    if (f_I && type != NMI && type != BRK_)
+        return;
+
+    if (type == BRK_) //Add one if BRK, a quirk of 6502
+        ++r_PC;
+
+    // 保存 PC 值
+    PushStack(r_PC >> 8);
+    PushStack(r_PC);
+
+    Byte flags = f_N << 7 |
+                    f_V << 6 |
+                    1 << 5 | //unused bit, supposed to be always 1
+        (type == BRK_) << 4 | //B flag set if BRK
+                    f_D << 3 |
+                    f_I << 2 |
+                    f_Z << 1 |
+                    f_C;
+    // 保存状态
+    PushStack(flags);
+
+    f_I = true;
+
+    switch (type)
+    {
+        case IRQ:
+        case BRK_:
+            // 中断向量
+            r_PC = ReadAddress(IRQVector);
+            break;
+        case NMI:
+            r_PC = ReadAddress(NMIVector);
+            break;
+    }
+
+    m_skipCycles += 7;
+}
 
 void CPU::SetZN(Byte value)
 {
+    // value 为 0 则 f_Z 置位
     f_Z = !value;
     f_N = value & 0x80;
 }
@@ -62,6 +102,12 @@ void CPU::SetPageCrossed(Address a, Address b, int inc)
     //Page is determined by the high byte
     if ((a & 0xff00) != (b & 0xff00))
         m_skipCycles += inc;
+}
+
+void CPU::SkipDMACycles()
+{
+    m_skipCycles += 513; //256 read + 256 write + 1 dummy read
+    m_skipCycles += (m_cycles & 1); //+1 if on odd cycle
 }
 
 void CPU::Step()
@@ -82,22 +128,29 @@ void CPU::Step()
                 f_Z << 1 |
                 f_C;
     */ 
-    Byte opcode = m_bus.Read(r_PC++);
+    static Byte opcode = 0;
+    static Byte lastOpcode = opcode;
+    opcode = m_bus.Read(r_PC++);
     auto CycleLength = OperationCycles[opcode];
-    // LOG(Info) << "CPU Step, opcode is:" 
-    //         <<  static_cast<int>(opcode)  
-    //         << "\t CycleLength is " << CycleLength
-    //          << std::endl;
+    if ( lastOpcode != opcode ) {
+        LOG(Info) << "CPU Step, PC is 0x" 
+            << std::hex 
+            <<  static_cast<int>(GetPC())
+            << "\t opcode is:" 
+            << std::hex 
+            <<  static_cast<int>(opcode)  
+            << "\t CycleLength is " << CycleLength
+             << std::endl;
+    }
     
-
     if(CycleLength && ( ExecuteImplied(opcode) || ExecuteBranch(opcode) ||
-                        ExecuteType1(opcode) || ExecuteType2(opcode)) )
+                        ExecuteType1(opcode) || ExecuteType2(opcode) || ExecuteType0(opcode)) )
     {
         m_skipCycles += CycleLength;
     }
     else
     {
-        LOG(Error) << "Unrecognized opcode: " << std::hex << +opcode << std::endl;
+        // LOG(Error) << "Unrecognized opcode: " << std::hex << +opcode << std::endl;
     }
 }
 
@@ -261,6 +314,8 @@ bool CPU::ExecuteImplied(Byte opcode)
 }
 bool CPU::ExecuteBranch(Byte opcode)
 {
+    // 跳转指令实现
+    // 
     if ((opcode & BranchInstructionMask) == BranchInstructionMaskResult)
     {
         //branch is initialized to the condition required (for the flag specified later)
@@ -271,6 +326,10 @@ bool CPU::ExecuteBranch(Byte opcode)
         switch (opcode >> BranchOnFlagShift)
         {
             case Negative:
+                // opcode = 0x10 为BPL指令 在获得 高位为1时才跳转
+                // 在马里奥游戏中前二十条指令存在 LDA 2020 , BPL 0xFB指令
+                // 0xF8 解释为 -5，LDA指令为4字长，所以PC会再次跳转到 LDA 2002上
+                // 也就是说必须等待PPU为vblank时才开始执行下一条指令
                 branch = !(branch ^ f_N);
                 break;
             case Overflow:
@@ -393,6 +452,13 @@ bool CPU::ExecuteType1(Byte opcode)
                 /* m_bus.Read()返回4，但是r_A输出是空的，是因为没加强制转换*/
                 r_A = m_bus.Read(location);
                 SetZN(r_A);
+                LOG(Info) << "LDA: " 
+                << std::hex 
+                <<  static_cast<int>(location)
+                << "R_A IS " 
+                << std::hex 
+                <<  static_cast<int>(r_A)  
+                << std::endl;
                 break;
             case SBC:
                 {
@@ -548,17 +614,25 @@ bool CPU::ExecuteType2(Byte opcode)
     return false;
 }
 
+#define DEBUG_OPCODE 0xA0
+
 bool CPU::ExecuteType0(Byte opcode)
 {
+    
     if ((opcode & InstructionModeMask) == 0x0)
     {
         Address location = 0;
+        if (opcode == DEBUG_OPCODE)
+        {
+            LOG(Info) << "Fetch Instruction :" << std::hex << static_cast<int>(DEBUG_OPCODE) << std::endl;
+        }
         switch (static_cast<AddressingMode2>((opcode & AddrModeMask) >> AddrModeShift))
         {
             case Immediate_:
                 location = r_PC++;
                 break;
             case ZeroPage_:
+
                 location = m_bus.Read(r_PC++);
                 break;
             case Absolute_:
@@ -591,7 +665,15 @@ bool CPU::ExecuteType0(Byte opcode)
                 m_bus.Write(location, r_Y);
                 break;
             case LDY:
+                // 调试时发现 A0 操作码无法解析成功
                 r_Y = m_bus.Read(location);
+                LOG(Info) << "LDY: " 
+                << std::hex 
+                <<  static_cast<int>(location)
+                << "\t r_Y is " 
+                << std::hex 
+                << static_cast<int>(r_A)  
+                << std::endl;
                 SetZN(r_Y);
                 break;
             case CPY:

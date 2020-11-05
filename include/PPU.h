@@ -10,9 +10,7 @@ const int ScanlineEndCycle = 340;
 // NES 图像分辨率为 256 x 240（长 x 宽）
 const int ScanlineVisibleDots = 256;
 const int VisibleScanlines = 240;
-
 const int FrameEndScanline = 261;
-
 const int AttributeOffset = 0x3C0;
 
 class PPU 
@@ -22,12 +20,25 @@ class PPU
 
         void Reset();
         void Step();
-
+        void SetInterruptCallback(std::function<void(void)> cb);
         /*OAM (Object Attribute Memory) */
 
+
+        void SetMask(Byte mask);
+        Byte GetStatus();
+        void SetDataAddress(Byte addr);
+        Byte GetData();
+        void SetData(Byte data);
+        Byte GetOAMData();
+        void Control(Byte ctrl);
+        void SetOAMAddress(Byte addr);
+        void SetOAMData(Byte value);
+        void SetScroll(Byte scroll);
+        void DoDMA(const Byte* page_ptr);
     private:
         Byte Read(Address addr);
-
+        Byte ReadOAM(Byte addr);
+        void WriteOAM(Byte addr, Byte value);
         PictureBus &m_bus;
         VirtualScreen &m_screen;
 
@@ -48,7 +59,8 @@ class PPU
 
         bool m_vblank;
         bool m_sprZeroHit;
-
+        // v blank 消隐
+        std::function<void(void)> m_vblankCallback;
         // 寄存器
         Address m_dataAddress;
         Address m_tempAddress;
@@ -71,6 +83,12 @@ class PPU
             Low,
             High,
         } m_bgPage, m_sprPage;
+
+
+        Address m_dataAddrIncrement;
+
+        // 存颜色的vector 的 vector
+        // picture 缓存
         std::vector<std::vector<sf::Color>> m_pictureBuffer;
 };
 
