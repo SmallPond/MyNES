@@ -157,3 +157,10 @@ LDFLAGS = -L/usr/local/Cellar/sfml/2.5.1/lib -lsfml-graphics -lsfml-window -lsfm
 ## PPU总线（Picture Bus）以及虚拟屏幕(Virtual Screen)的实现
 
 在使用 SFML 库创建一个 windows后，内容的填充使用 VirtualScreen 类来实现。PictureBus 类似于我们之前实现的 MainBus，不过 PictureBus 是用来连接PPU（Picture Processing Unit,类比于现在的显卡）和 vdeio 相关的存储的。 
+
+# Day6
+
+反汇编工具 [md6502](http://nesdev.com/md6502.zip) Windows 下可用，用法：
+```
+md6502.exe [input file] [output file] [options]
+```
