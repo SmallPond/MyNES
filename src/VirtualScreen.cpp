@@ -17,7 +17,8 @@ void VirtualScreen::Create(unsigned int width, unsigned int height, float pixel_
     {
         for (std::size_t y = 0; y < height; ++y)
         {
-            auto index = (x * m_screenSize.y + y);
+            // 神坑， 之前这边没注意乘6
+            auto index = (x * m_screenSize.y + y) * 6;
             // float 型 二元组
             sf::Vector2f coord2d (x * m_pixelSize, y * m_pixelSize);
             // 上左

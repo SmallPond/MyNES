@@ -10,7 +10,7 @@ Emulator::Emulator():
     m_screenScale(2.f),
     m_ppu(m_pictureBus, m_emulatorScreen),
     m_cycleTimer(),
-    m_cpuCycleDuration(std::chrono::nanoseconds(255559))
+    m_cpuCycleDuration(std::chrono::nanoseconds(559))
 {
     // 855555559
     if(!m_bus.SetReadCallback(PPUSTATUS, [&](void) {return m_ppu.GetStatus();}) ||
