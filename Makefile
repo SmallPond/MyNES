@@ -27,8 +27,9 @@ TARGET = myNES
 
 # 所有的中间文件生成目标文件
 # $@目标文件 $^所有依赖文件 $< 第一个依赖文件
+# 血的教训：$(LDFLAGS)一定要放到最后，不然在Ubuntu会链接报错
 ${TARGET}: ${OBJS}
-	$(CC) $(LDFLAGS) ${OBJS} -o $@  
+	$(CC)  ${OBJS} -o $@   $(LDFLAGS)
 
 #生成中间文件
 ${OBJ}/%.o:${SRC}/%.cpp

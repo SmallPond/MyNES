@@ -134,6 +134,15 @@ Flags6的高四位记录了mapper number的低四位，Flags7的高四位记录�
 
 # Day5
 
+## Ubuntu 下通过 apt 安装 sfml
+
+```
+sudo apt install libsfml-dev
+
+# 查看安装位置
+dpkg -L libsfml-dev
+```
+
 ## SFML多媒体库配置和使用
 根据自己所使用的操作系统，在[SFML官方文档](https://www.sfml-dev.org/tutorials/2.5/)找到对应的配置方式。
 
@@ -149,6 +158,12 @@ CFLAGS = -g -Wall -I${INC} -I${SFML_INC} -std=c++11
 LDFLAGS = -L/usr/local/Cellar/sfml/2.5.1/lib -lsfml-graphics -lsfml-window -lsfml-system
 ```
 
+若SFML库文件不在默认的库目录下，运行之前需要导出环境变量，参考[官方文档](https://www.sfml-dev.org/tutorials/2.5/start-linux.php)：
+
+```
+export LD_LIBRARY_PATH=<sfml-install-path>/lib && ./sfml-app
+```
+
 编译运行结果如图：
 
 ![SFML库环境测试](./images/SFML_Test.png)
@@ -160,7 +175,24 @@ LDFLAGS = -L/usr/local/Cellar/sfml/2.5.1/lib -lsfml-graphics -lsfml-window -lsfm
 
 # Day6
 
-反汇编工具 [md6502](http://nesdev.com/md6502.zip) Windows 下可用，用法：
+- 实现 PPU 的各个回调函数
+- 在调试过程中修正了 virtualScreen.cpp 文件 index 计算未乘六的bug
+
+调试花了半天时间，终于实现了超级马里奥游戏画面的加载。
+
+![游戏画面](./images/GameScreen.png)
+
+调试过程涉及到使用反汇编工具 [md6502](http://nesdev.com/md6502.zip) 反汇编超级马里奥游戏（文档不详细，所以反汇编出来的指令地址与实际相差几个数）。Windows 下可用，用法：
 ```
 md6502.exe [input file] [output file] [options]
+```
+
+暂未实现两个寄存器(joy sticks，游戏杆)读写的回调函数，因此在运行时会报错。下一步完成游戏操作的实现，就可以完整实现整个模拟器了！     
+```
+JOY1 = 0x4016,     // Joystick1 + Strobe
+JOY2 = 0x4017,     // Joystick2 + Strobe
+
+No read callback registered for I/O register at: 4016
+No read callback registered for I/O register at: 4017
+
 ```
