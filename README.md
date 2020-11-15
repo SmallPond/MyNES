@@ -31,6 +31,13 @@ LDFLAGS = -L${SFML_LIB} -lsfml-graphics -lsfml-window -lsfml-system
 ## 执行
 
 ```c
+
+git clone https://github.com/SmallPond/MyNES
+
+cd MyNES
+
+mkdir build
+
 # 编译
 make
 
