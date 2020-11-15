@@ -9,9 +9,16 @@
 #include <VirtualScreen.h>
 #include <PPU.h>
 #include <PictureBus.h>
+#include <Controller.h>
+
 
 const int NESVideoWidth = ScanlineVisibleDots;
 const int NESVideoHeight = VisibleScanlines;
+
+
+
+
+
 
 class Emulator
 {
@@ -29,7 +36,8 @@ class Emulator
         MainBus m_bus;
         std::unique_ptr<Mapper> m_mapper;
         sf::RenderWindow m_window;
-
+        // 两个游戏手柄
+        Controller m_controller1, m_controller2;
         // 控制屏幕缩放
         float m_screenScale;
         // 计时

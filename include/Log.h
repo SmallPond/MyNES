@@ -9,13 +9,13 @@
 #ifndef __FILENAME__
 #define __FILENAME__ __FILE__
 #endif
-/*
+
 #define LOG(level) \
 if (level > Log::get().getLevel()) ; \
 else Log::get().getStream() << '[' << __FILENAME__ << ":" << std::dec << __LINE__ << "] "
-*/
 
-#define LOG(level) std::cout
+
+// #define LOG(level) std::cout
 
 
 #define LOG_CPU \

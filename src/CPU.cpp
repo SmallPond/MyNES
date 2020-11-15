@@ -697,5 +697,3 @@ bool CPU::ExecuteType0(Byte opcode)
     }
     return false;
 }
-
-
