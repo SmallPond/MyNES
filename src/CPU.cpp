@@ -15,7 +15,7 @@ void CPU::Reset()
 
 void CPU::Step()
 {
-    Byte opcode = m_bus.Read(r_PC++);
+    // Byte opcode = m_bus.Read(r_PC++);
     // 待实现解码执行
 }
 Address CPU::ReadAddress(Address addr)

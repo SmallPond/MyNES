@@ -12,8 +12,6 @@ CFLAGS = -g -Wall -I${INC} -std=c++11
 
 
 SOURCES = $(wildcard ${SRC}/*.cpp)
-MAIN_FILE = ./main.cpp
-SOURCES += ${MAIN_FILE}
 $(info $(SOURCES))
 
 
